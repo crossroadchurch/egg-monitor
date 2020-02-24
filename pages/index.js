@@ -1,3 +1,4 @@
+import { eggs } from '../qr_codes/easter-data.json'
 import Page from '../components/page'
 import TeamStat from '../components/teamstat'
 import EggStat from '../components/eggstat'
@@ -13,16 +14,17 @@ const team_doc = db.collection('teams')
 export default () => {
   const [teamdata, setTeamdata] = useState([])
   const [eggdata, setEggdata] = useState(
-    Array(42).fill({ found_count: 0, last_found: '2000-01-01 00:00:00' })
+    eggs.map((egg) => {
+      return { ...egg, found_count: 0, last_found: '2000-01-01 00:00:00' }
+    })
   )
 
   useEffect(() => {
     const unsubscribe = team_doc.onSnapshot((snapshot) => {
       if (snapshot.size) {
         let new_data = []
-        let cur_eggs = Array(42).fill({
-          found_count: 0,
-          last_found: '2000-01-01 00:00:00'
+        let cur_eggs = eggs.map((egg) => {
+          return { ...egg, found_count: 0, last_found: '2000-01-01 00:00:00' }
         })
         snapshot.forEach((team) => {
           let egg_count = team.data().eggs ? team.data().eggs.length : 0
@@ -30,8 +32,8 @@ export default () => {
           if (egg_count > 0) {
             team.data().eggs.forEach((egg) => {
               let idx = parseInt(egg.id)
-              console.log(egg)
               cur_eggs[idx] = {
+                ...cur_eggs[idx],
                 found_count: cur_eggs[idx].found_count + 1,
                 last_found:
                   cur_eggs[idx].last_found > egg.found
@@ -72,12 +74,12 @@ export default () => {
                 return <TeamStat key={team.id} {...team} />
               })}
             </section>
-            <h1 className="text-2xl font-bold mb-1 whitespace-no-wrap">
+            <h1 className="pt-4 text-2xl font-bold mb-1 whitespace-no-wrap">
               Egg Statistics
             </h1>
             <section>
               {eggdata.map((egg, index) => {
-                return <EggStat key={index} {...{ egg_id: index, ...egg }} />
+                return <EggStat key={index} {...egg} />
               })}
             </section>
           </div>
