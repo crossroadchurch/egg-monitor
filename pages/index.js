@@ -53,7 +53,26 @@ export default () => {
               : -1
             : -1
         )
-        setTeamdata(new_data)
+        let high_scores = [
+          ...new Set(
+            new_data.map((team) => {
+              return team.egg_count
+            })
+          ),
+          ...[-1, -1, -1]
+        ] // [-1, -1, -1] ensures that high_scores has at least 3 elements
+        let placed_data = new_data.map((team) => {
+          let team_place =
+            team.egg_count === high_scores[0]
+              ? 'first_place'
+              : team.egg_count === high_scores[1]
+              ? 'second_place'
+              : team.egg_count === high_scores[2]
+              ? 'third_place'
+              : `${team.egg_count}_eggs`
+          return { ...team, place: team_place }
+        })
+        setTeamdata(placed_data)
         setEggdata(cur_eggs)
       } else {
         console.log('Snapshot has no data')
